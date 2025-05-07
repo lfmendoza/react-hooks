@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Filtro de Usuarios con useMemo</title>
+
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="root" class="container mx-auto py-8"></div>
+
+    <script type="text/babel">
+      const { useState, useMemo } = React;
+
+      const UserSearch = () => {
+        const [users, setUsers] = useState([
+          {
+            id: 1,
+            name: "Claudia Sonnet",
+            description:
+              "Me gusta ayudar a las personas a resolver problemas de programación",
+          },
+          {
+            id: 2,
+            name: "Monkey D. Luffy",
+            description:
+              "Capitán de los Piratas de Sombrero de Paja y futuro Rey de los Piratas",
+          },
+          {
+            id: 3,
+            name: "Roronoa Zoro",
+            description:
+              "Espadachín de los Piratas de Sombrero de Paja con el sueño de ser el mejor espadachín del mundo",
+          },
+          {
+            id: 4,
+            name: "Nami",
+            description:
+              "Navegante de los Piratas de Sombrero de Paja y experta en meteorología",
+          },
+          {
+            id: 5,
+            name: "Usopp",
+            description:
+              "Tirador de los Piratas de Sombrero de Paja conocido por sus historias exageradas",
+          },
+          {
+            id: 6,
+            name: "Sanji",
+            description:
+              "Cocinero de los Piratas de Sombrero de Paja y experto en combate con piernas",
+          },
+        ]);
+
+        const [searchText, setSearchText] = useState("");
+
+        const [caseSensitive, setCaseSensitive] = useState(false);
+
+        const [newUserName, setNewUserName] = useState("");
+        const [newUserDescription, setNewUserDescription] = useState("");
+
+        const filteredUsers = useMemo(() => {
+          console.log("Recalculando usuarios filtrados...");
+
+          if (!searchText) return users;
+
+          return users.filter((user) => {
+            const name = caseSensitive ? user.name : user.name.toLowerCase();
+            const description = caseSensitive
+              ? user.description
+              : user.description.toLowerCase();
+            const search = caseSensitive
+              ? searchText
+              : searchText.toLowerCase();
+
+            return name.includes(search) || description.includes(search);
+          });
+        }, [users, searchText, caseSensitive]);
+
+        const handleAddUser = () => {
+          if (newUserName.trim() === "" || newUserDescription.trim() === "") {
+            alert("Por favor, completa todos los campos");
+            return;
+          }
+
+          const newUser = {
+            id: users.length + 1,
+            name: newUserName,
+            description: newUserDescription,
+          };
+
+          setUsers([...users, newUser]);
+          setNewUserName("");
+          setNewUserDescription("");
+        };
+
+        return (
+          <div className="p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-md">
+            <h1 className="text-2xl font-bold mb-6 text-center">
+              Buscador de Usuarios con useMemo
+            </h1>
+
+            <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+              <div className="flex items-center mb-4">
+                <input
+                  type="text"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder="Buscar por nombre o descripción..."
+                  className="flex-1 p-2 border rounded"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="case-sensitive"
+                  checked={caseSensitive}
+                  onChange={(e) => setCaseSensitive(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="case-sensitive">
+                  Distinguir mayúsculas y minúsculas
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+              <h2 className="text-xl font-semibold mb-4">
+                Agregar nuevo usuario
+              </h2>
+              <div className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  placeholder="Nombre del usuario"
+                  className="p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  value={newUserDescription}
+                  onChange={(e) => setNewUserDescription(e.target.value)}
+                  placeholder="Descripción"
+                  className="p-2 border rounded"
+                />
+                <button
+                  onClick={handleAddUser}
+                  className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+                >
+                  Agregar Usuario
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold mb-4">
+                Usuarios ({filteredUsers.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <h3 className="text-lg font-semibold">{user.name}</h3>
+                    <p className="text-gray-600">{user.description}</p>
+                  </div>
+                ))}
+              </div>
+              {filteredUsers.length === 0 && (
+                <p className="text-center text-gray-500 my-4">
+                  No se encontraron usuarios
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<UserSearch />);
+    </script>
+  </body>
+</html>
