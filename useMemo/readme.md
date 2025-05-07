@@ -39,7 +39,7 @@ El componente principal UserSearch utiliza:
 
 ## Demo en vivo
 
-Puedes ver el proyecto funcionando en: [http://awita.site/usuarios/men19644/react-hooks/useMemo](http://awita.site/usuarios/men19644/react-hooks/useMemo)
+Proyecto funcionando en: [http://awita.site/usuarios/men19644/react-hooks/useMemo](http://awita.site/usuarios/men19644/react-hooks/useMemo)
 
 ## Estructura del proyecto
 

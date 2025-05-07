@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cronómetro con React Hooks</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="root" class="container mx-auto py-8"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useRef } = React;
+
+      const formatTime = (time) => {
+        const minutes = Math.floor(time / 60000);
+        const seconds = Math.floor((time % 60000) / 1000);
+        const milliseconds = Math.floor((time % 1000) / 10);
+
+        return `${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}:${milliseconds.toString().padStart(2, "0")}`;
+      };
+
+      const Stopwatch = () => {
+        const [time, setTime] = useState(0);
+        const [isRunning, setIsRunning] = useState(false);
+        const [sessions, setSessions] = useState([]);
+
+        const intervalRef = useRef(null);
+        const startTimeRef = useRef(0);
+        const accumulatedTimeRef = useRef(0);
+
+        useEffect(() => {
+          if (isRunning) {
+            startTimeRef.current = Date.now() - accumulatedTimeRef.current;
+
+            intervalRef.current = setInterval(() => {
+              const currentTime = Date.now() - startTimeRef.current;
+              setTime(currentTime);
+            }, 10);
+          } else {
+            accumulatedTimeRef.current = time;
+
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+            }
+          }
+
+          return () => {
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+            }
+          };
+        }, [isRunning]);
+
+        const toggleTimer = () => {
+          setIsRunning(!isRunning);
+        };
+
+        const resetTimer = () => {
+          setIsRunning(false);
+          setTime(0);
+          accumulatedTimeRef.current = 0;
+        };
+
+        const saveSession = () => {
+          const newSession = {
+            id: sessions.length + 1,
+            time: time,
+            formattedTime: formatTime(time),
+          };
+
+          setSessions([...sessions, newSession]);
+        };
+
+        return (
+          <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+            <h1 className="text-3xl font-bold mb-6 text-center">Cronómetro</h1>
+
+            <div className="text-5xl font-mono text-center mb-8 font-bold">
+              {formatTime(time)}
+            </div>
+
+            <div className="flex justify-center gap-4 mb-8">
+              <button
+                onClick={toggleTimer}
+                className={`px-4 py-2 rounded font-bold ${
+                  isRunning
+                    ? "bg-yellow-500 hover:bg-yellow-600"
+                    : "bg-green-500 hover:bg-green-600"
+                } text-white transition-colors`}
+              >
+                {isRunning ? "Pausar" : "Iniciar"}
+              </button>
+
+              <button
+                onClick={resetTimer}
+                className="px-4 py-2 rounded font-bold bg-red-500 hover:bg-red-600 text-white transition-colors"
+              >
+                Reiniciar
+              </button>
+
+              <button
+                onClick={saveSession}
+                className="px-4 py-2 rounded font-bold bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                disabled={time === 0}
+              >
+                Guardar Sesión
+              </button>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold mb-4 border-b pb-2">
+                Sesiones Guardadas
+              </h2>
+
+              {sessions.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">
+                  No hay sesiones guardadas
+                </p>
+              ) : (
+                <ul className="divide-y">
+                  {sessions.map((session) => (
+                    <li
+                      key={session.id}
+                      className="py-3 flex justify-between items-center"
+                    >
+                      <span className="font-semibold">Sesión {session.id}</span>
+                      <span className="font-mono">{session.formattedTime}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<Stopwatch />);
+    </script>
+  </body>
+</html>
