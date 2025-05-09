@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tema Claro/Oscuro con useContext</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div id="root" class="container mx-auto py-8"></div>
+
+    <script type="text/babel">
+      const { useState, useContext, createContext } = React;
+
+      const ThemeContext = createContext();
+
+      const ThemeProvider = ({ children }) => {
+        const [darkMode, setDarkMode] = useState(false);
+
+        const toggleTheme = () => {
+          setDarkMode((prevMode) => !prevMode);
+        };
+
+        const themeData = {
+          darkMode,
+          toggleTheme,
+        };
+
+        return (
+          <ThemeContext.Provider value={themeData}>
+            {children}
+          </ThemeContext.Provider>
+        );
+      };
+
+      const ThemeToggle = () => {
+        const { darkMode, toggleTheme } = useContext(ThemeContext);
+
+        return (
+          <button
+            onClick={toggleTheme}
+            className={`px-4 py-2 rounded-full font-bold transition-colors ${
+              darkMode
+                ? "bg-yellow-400 text-gray-900 hover:bg-yellow-300"
+                : "bg-gray-800 text-white hover:bg-gray-700"
+            }`}
+          >
+            {darkMode ? "☀️ Cambiar a Modo Claro" : "🌙 Cambiar a Modo Oscuro"}
+          </button>
+        );
+      };
+
+      const ThemeDisplay = () => {
+        const { darkMode } = useContext(ThemeContext);
+
+        return (
+          <div
+            className={`p-8 rounded-lg shadow-lg transition-colors ${
+              darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
+            }`}
+          >
+            <h2 className="text-xl font-bold mb-4">
+              {darkMode ? "Modo Oscuro Activado" : "Modo Claro Activado"}
+            </h2>
+            <p className="mb-4">
+              Este componente está utilizando el contexto para obtener el tema
+              actual.
+            </p>
+            <p
+              className={`text-sm ${
+                darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              Los estilos cambian automáticamente basados en el estado global
+              del tema.
+            </p>
+          </div>
+        );
+      };
+
+      const NestedComponent = () => {
+        return (
+          <div className="mt-8 p-4 border border-dashed rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Componente Anidado</h3>
+            <p className="mb-4">
+              Este componente está anidado y aún así puede acceder al contexto
+              del tema:
+            </p>
+            <ThemeDisplay />
+          </div>
+        );
+      };
+
+      const App = () => {
+        return (
+          <ThemeProvider>
+            <div className="max-w-3xl mx-auto">
+              <h1 className="text-3xl font-bold mb-8 text-center">
+                Demostración de useContext
+              </h1>
+
+              <div className="mb-8 flex justify-center">
+                <ThemeToggle />
+              </div>
+
+              <div className="mb-8">
+                <ThemeDisplay />
+              </div>
+
+              <NestedComponent />
+
+              <div className="mt-10 p-4 bg-blue-100 border-l-4 border-blue-500 rounded">
+                <h2 className="text-xl font-bold mb-2">
+                  ¿Cómo funciona useContext?
+                </h2>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <strong>ThemeProvider</strong>: Componente que crea el
+                    "store compartido" usando <code>createContext</code>
+                  </li>
+                  <li>
+                    <strong>useContext</strong>: Hook que permite a los
+                    componentes acceder a los datos del contexto
+                  </li>
+                  <li>
+                    <strong>Valor del Contexto</strong>: Contiene el estado{" "}
+                    <code>darkMode</code> y la función <code>toggleTheme</code>
+                  </li>
+                  <li>
+                    <strong>Sin Prop Drilling</strong>: El tema y la función
+                    para cambiarlo están disponibles en cualquier nivel sin
+                    pasarlos por props
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </ThemeProvider>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
